@@ -204,8 +204,8 @@ public final class Builder {
             return;
         } */
 
-        // if (text == null || summary == null && text.length() < 45)
-        //    return;
+        if (text == null || summary == null && text.length() < 45)
+            return;
 
         applyBigTextStyle(builder);
     }
