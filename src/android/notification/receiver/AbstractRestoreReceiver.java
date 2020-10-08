@@ -26,7 +26,6 @@ package de.appplant.cordova.plugin.notification.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.UserManager;
 
 import org.json.JSONObject;
 
@@ -58,11 +57,8 @@ abstract public class AbstractRestoreReceiver extends BroadcastReceiver {
     public void onReceive (Context context, Intent intent) {
         String action = intent.getAction();
 
-        if (SDK_INT >= 24) {
-          UserManager um = (UserManager) context.getSystemService(UserManager.class);
-          if (um == null || um.isUserUnlocked() == false)
+        if (action.equals(ACTION_BOOT_COMPLETED) && SDK_INT >= 24)
             return;
-        }
 
         Manager mgr               = Manager.getInstance(context);
         List<JSONObject> toasts = mgr.getOptions();
