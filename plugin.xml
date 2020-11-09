@@ -90,7 +90,8 @@
 
     <!-- android -->
     <platform name="android">
-        <framework src="com.android.support:support-v4:26.+" />
+        <preference name="ANDROIDX_LEGACY_SUPPORT_V4_VERSION" default="1.0.0"/>
+        <framework src="androidx.legacy:legacy-support-v4:$ANDROIDX_LEGACY_SUPPORT_V4_VERSION"/>
         <framework src="src/android/build/localnotification.gradle" custom="true" type="gradleReference"/>
 
         <config-file target="res/xml/config.xml" parent="/*">
