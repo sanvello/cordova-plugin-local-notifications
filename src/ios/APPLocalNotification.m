@@ -268,29 +268,33 @@ UNNotificationPresentationOptions const OptionAlert = UNNotificationPresentation
 - (void) ids:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        int code                 = [command.arguments[0] intValue];
-        APPNotificationType type = NotifcationTypeUnknown;
+        
+        if (command.arguments.count != 0) {
+            
+            int code                 = [command.arguments[0] intValue];
+            APPNotificationType type = NotifcationTypeUnknown;
 
-        switch (code) {
-            case 0:
-                type = NotifcationTypeAll;
-                break;
-            case 1:
-                type = NotifcationTypeScheduled;
-                break;
-            case 2:
-                type = NotifcationTypeTriggered;
-                break;
+            switch (code) {
+                case 0:
+                    type = NotifcationTypeAll;
+                    break;
+                case 1:
+                    type = NotifcationTypeScheduled;
+                    break;
+                case 2:
+                    type = NotifcationTypeTriggered;
+                    break;
+            }
+
+            NSArray* ids = [_center getNotificationIdsByType:type];
+
+            CDVPluginResult* result;
+            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                        messageAsArray:ids];
+
+            [self.commandDelegate sendPluginResult:result
+                                        callbackId:command.callbackId];
         }
-
-        NSArray* ids = [_center getNotificationIdsByType:type];
-
-        CDVPluginResult* result;
-        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
-                                    messageAsArray:ids];
-
-        [self.commandDelegate sendPluginResult:result
-                                    callbackId:command.callbackId];
     }];
 }
 
@@ -328,37 +332,39 @@ UNNotificationPresentationOptions const OptionAlert = UNNotificationPresentation
 - (void) notifications:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        int code                 = [command.arguments[0] intValue];
-        APPNotificationType type = NotifcationTypeUnknown;
-        NSArray* toasts;
-        NSArray* ids;
+        if (command.arguments.count != 0) {
+            int code                 = [command.arguments[0] intValue];
+            APPNotificationType type = NotifcationTypeUnknown;
+            NSArray* toasts;
+            NSArray* ids;
 
-        switch (code) {
-            case 0:
-                type = NotifcationTypeAll;
-                break;
-            case 1:
-                type = NotifcationTypeScheduled;
-                break;
-            case 2:
-                type = NotifcationTypeTriggered;
-                break;
-            case 3:
-                ids    = command.arguments[1];
-                toasts = [_center getNotificationOptionsById:ids];
-                break;
+            switch (code) {
+                case 0:
+                    type = NotifcationTypeAll;
+                    break;
+                case 1:
+                    type = NotifcationTypeScheduled;
+                    break;
+                case 2:
+                    type = NotifcationTypeTriggered;
+                    break;
+                case 3:
+                    ids    = command.arguments[1];
+                    toasts = [_center getNotificationOptionsById:ids];
+                    break;
+            }
+
+            if (toasts == nil) {
+                toasts = [_center getNotificationOptionsByType:type];
+            }
+
+            CDVPluginResult* result;
+            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                        messageAsArray:toasts];
+
+            [self.commandDelegate sendPluginResult:result
+                                        callbackId:command.callbackId];
         }
-
-        if (toasts == nil) {
-            toasts = [_center getNotificationOptionsByType:type];
-        }
-
-        CDVPluginResult* result;
-        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
-                                    messageAsArray:toasts];
-
-        [self.commandDelegate sendPluginResult:result
-                                    callbackId:command.callbackId];
     }];
 }
 
@@ -401,26 +407,28 @@ UNNotificationPresentationOptions const OptionAlert = UNNotificationPresentation
 - (void) actions:(CDVInvokedUrlCommand *)command
 {
     [self.commandDelegate runInBackground:^{
-        int code             = [command.arguments[0] intValue];
-        NSString* identifier = [command argumentAtIndex:1];
-        NSArray* actions     = [command argumentAtIndex:2];
-        UNNotificationCategory* group;
-        BOOL found;
+        if (command.arguments.count != 0) {
+            int code             = [command.arguments[0] intValue];
+            NSString* identifier = [command argumentAtIndex:1];
+            NSArray* actions     = [command argumentAtIndex:2];
+            UNNotificationCategory* group;
+            BOOL found;
 
-        switch (code) {
-            case 0:
-                group = [APPNotificationCategory parse:actions withId:identifier];
-                [_center addActionGroup:group];
-                [self execCallback:command];
-                break;
-            case 1:
-                [_center removeActionGroup:identifier];
-                [self execCallback:command];
-                break;
-            case 2:
-                found = [_center hasActionGroup:identifier];
-                [self execCallback:command arg:found];
-                break;
+            switch (code) {
+                case 0:
+                    group = [APPNotificationCategory parse:actions withId:identifier];
+                    [_center addActionGroup:group];
+                    [self execCallback:command];
+                    break;
+                case 1:
+                    [_center removeActionGroup:identifier];
+                    [self execCallback:command];
+                    break;
+                case 2:
+                    found = [_center hasActionGroup:identifier];
+                    [self execCallback:command arg:found];
+                    break;
+            }
         }
     }];
 }
