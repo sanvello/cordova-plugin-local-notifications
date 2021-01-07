@@ -269,10 +269,12 @@ UNNotificationPresentationOptions const OptionAlert = UNNotificationPresentation
 {
     [self.commandDelegate runInBackground:^{
         
+        APPNotificationType type = NotifcationTypeUnknown;
+        
         if (command.arguments.count != 0) {
             
-            int code                 = [command.arguments[0] intValue];
-            APPNotificationType type = NotifcationTypeUnknown;
+            int code = [command.arguments[0] intValue];
+            
 
             switch (code) {
                 case 0:
@@ -285,16 +287,15 @@ UNNotificationPresentationOptions const OptionAlert = UNNotificationPresentation
                     type = NotifcationTypeTriggered;
                     break;
             }
-
-            NSArray* ids = [_center getNotificationIdsByType:type];
-
-            CDVPluginResult* result;
-            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
-                                        messageAsArray:ids];
-
-            [self.commandDelegate sendPluginResult:result
-                                        callbackId:command.callbackId];
         }
+        NSArray* ids = [_center getNotificationIdsByType:type];
+
+        CDVPluginResult* result;
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                    messageAsArray:ids];
+
+        [self.commandDelegate sendPluginResult:result
+                                    callbackId:command.callbackId];
     }];
 }
 
@@ -332,11 +333,16 @@ UNNotificationPresentationOptions const OptionAlert = UNNotificationPresentation
 - (void) notifications:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
+        
+        APPNotificationType type = NotifcationTypeUnknown;
+        
+        NSArray* toasts;
+        NSArray* ids;
+        
         if (command.arguments.count != 0) {
             int code                 = [command.arguments[0] intValue];
-            APPNotificationType type = NotifcationTypeUnknown;
-            NSArray* toasts;
-            NSArray* ids;
+            
+
 
             switch (code) {
                 case 0:
@@ -353,18 +359,19 @@ UNNotificationPresentationOptions const OptionAlert = UNNotificationPresentation
                     toasts = [_center getNotificationOptionsById:ids];
                     break;
             }
-
-            if (toasts == nil) {
-                toasts = [_center getNotificationOptionsByType:type];
-            }
-
-            CDVPluginResult* result;
-            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
-                                        messageAsArray:toasts];
-
-            [self.commandDelegate sendPluginResult:result
-                                        callbackId:command.callbackId];
         }
+
+        if (toasts == nil) {
+            toasts = [_center getNotificationOptionsByType:type];
+        }
+
+        CDVPluginResult* result;
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                    messageAsArray:toasts];
+
+        [self.commandDelegate sendPluginResult:result
+                                    callbackId:command.callbackId];
+
     }];
 }
 
@@ -429,6 +436,8 @@ UNNotificationPresentationOptions const OptionAlert = UNNotificationPresentation
                     [self execCallback:command arg:found];
                     break;
             }
+        } else {
+            [self execCallback:command];
         }
     }];
 }
