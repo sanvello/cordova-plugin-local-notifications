@@ -324,7 +324,7 @@ public final class Builder {
         int reqCode = random.nextInt();
 
         PendingIntent deleteIntent = PendingIntent.getBroadcast(
-                context, reqCode, intent, FLAG_UPDATE_CURRENT);
+                context, reqCode, intent, FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         builder.setDeleteIntent(deleteIntent);
     }
@@ -353,7 +353,7 @@ public final class Builder {
         int reqCode = random.nextInt();
 
         PendingIntent contentIntent = PendingIntent.getService(
-                context, reqCode, intent, FLAG_UPDATE_CURRENT);
+                context, reqCode, intent, FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
 
         builder.setContentIntent(contentIntent);
     }
@@ -403,7 +403,7 @@ public final class Builder {
         int reqCode = random.nextInt();
 
         return PendingIntent.getService(
-                context, reqCode, intent, FLAG_UPDATE_CURRENT);
+                context, reqCode, intent, FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     /**
