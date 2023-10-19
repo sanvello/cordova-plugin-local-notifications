@@ -28,6 +28,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.service.notification.StatusBarNotification;
 import androidx.core.app.NotificationCompat;
@@ -44,15 +45,24 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import androidx.collection.ArraySet;
+import androidx.core.app.NotificationCompat;
 
 import static android.app.AlarmManager.RTC;
 import static android.app.AlarmManager.RTC_WAKEUP;
-import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.M;
 import static androidx.core.app.NotificationCompat.PRIORITY_HIGH;
-import static androidx.core.app.NotificationManagerCompat.IMPORTANCE_MAX;
-import static androidx.core.app.NotificationManagerCompat.IMPORTANCE_MIN;
+import static androidx.core.app.NotificationCompat.PRIORITY_MAX;
+import static androidx.core.app.NotificationCompat.PRIORITY_MIN;
+import static java.lang.Thread.sleep;
 
 /**
  * Wrapper class around OS notification class. Handles basic operations
@@ -218,18 +228,19 @@ public final class Notification {
                 continue;
 
             PendingIntent pi = PendingIntent.getBroadcast(
-                    context, 0, intent, FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                    context, 0, intent, FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
             try {
                 switch (options.getPrio()) {
-                    case IMPORTANCE_MIN:
+                    case PRIORITY_MIN:
                         mgr.setExact(RTC, time, pi);
                         break;
-                    case IMPORTANCE_MAX:
+                    case PRIORITY_MAX:
                         if (SDK_INT >= M) {
-                            mgr.setExactAndAllowWhileIdle(RTC_WAKEUP, time, pi);
+                            AlarmManager.AlarmClockInfo info = new AlarmManager.AlarmClockInfo(time, pi);
+                            mgr.setAlarmClock(info, pi);
                         } else {
-                            mgr.setExact(RTC, time, pi);
+                            mgr.setExact(RTC_WAKEUP, time, pi);
                         }
                         break;
                     default:
@@ -324,6 +335,8 @@ public final class Notification {
         }
 
         grantPermissionToPlaySoundFromExternal();
+        new NotificationVolumeManager(context, options)
+            .adjustAlarmVolume();
         getNotMgr().notify(getId(), builder.build());
     }
 
