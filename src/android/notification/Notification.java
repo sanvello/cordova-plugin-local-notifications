@@ -316,7 +316,7 @@ public final class Notification {
             Intent intent = new Intent(action);
 
             PendingIntent pi = PendingIntent.getBroadcast(
-                    context, 0, intent, 0 | PendingIntent.FLAG_MUTABLE);
+                    context, 0, intent, 0 | PendingIntent.FLAG_IMMUTABLE);
 
             if (pi != null) {
                 getAlarmMgr().cancel(pi);
